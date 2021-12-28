@@ -24,19 +24,23 @@ const Player = (symbol) => {
     return { getSymbol };
 };
 
+
 // gameplay controller module
 
 const gamePlayController = (() => {
-
     const player1 = Player("X");
     const player2 = Player("O");
 
-    gameBoard.addMark(player1.getSymbol(), 1);
-    gameBoard.addMark(player2.getSymbol(), 4);
 
-    console.log(gameBoard.board);
+    let currentPlayer = player1;
 
-    return {};
+    const getCurrentPlayerSymbol = () => currentPlayer.getSymbol();
+
+    function switchTurn() {
+        currentPlayer == player1 ? currentPlayer = player2 : currentPlayer = player1;
+   }
+
+    return { getCurrentPlayerSymbol, switchTurn };
 
 })();
 
@@ -44,15 +48,31 @@ const gamePlayController = (() => {
 
 const displayController = (() => {
     
-    function renderContents(board) {
-        board.forEach(tile => {
-            tileDOM = document.createElement('div');
-            tileDOM.textContent = tile;
+    const DOMTiles = document.querySelectorAll('.tile');
+    DOMTiles.forEach(tile => tile.addEventListener('click', (e) => {
+        
+        let currentSymbol = gamePlayController.getCurrentPlayerSymbol();
+        let pos = e.target.id;
 
-            document.body.appendChild(tileDOM);
+        if (e.target.textContent == "") {
+            gameBoard.addMark(currentSymbol, pos);
+            renderContents(gameBoard.board);
+
+            gamePlayController.switchTurn();
+        }
+        
+
+    }));
+    
+    
+    function renderContents(board) {
+        DOMTiles.forEach((tile, index) => {
+            tile.textContent = board[index];
         });
     }
 
-    return { renderContents };
 })();
+
+
+
 
