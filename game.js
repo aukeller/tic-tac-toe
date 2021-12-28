@@ -2,23 +2,39 @@
 
 const gameBoard = (() => {
 
-    const board = ["X", "O", "X", "O", "X", "O"];
+    const board = ["", "", "", 
+                   "", "", "",
+                   "", "", ""];
+
+    function addMark(playerSymbol, pos) {
+        board[pos] = playerSymbol;
+    }
 
     
-    return { board }; // returns publicly exposed methods, variables
+    return { board, addMark }; // returns publicly exposed methods, variables
 
 })();
 
 // player factory function
 
-const Player = () => {
+const Player = (symbol) => {
     
-    return {};
+    const getSymbol = () => symbol;
+
+    return { getSymbol };
 };
 
 // gameplay controller module
 
 const gamePlayController = (() => {
+
+    const player1 = Player("X");
+    const player2 = Player("O");
+
+    gameBoard.addMark(player1.getSymbol(), 1);
+    gameBoard.addMark(player2.getSymbol(), 4);
+
+    console.log(gameBoard.board);
 
     return {};
 
@@ -40,4 +56,3 @@ const displayController = (() => {
     return { renderContents };
 })();
 
-displayController.renderContents(gameBoard.board);
