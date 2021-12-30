@@ -30,5 +30,12 @@ body {
 }
 
 .tile {
+    width: 330px;
+    height: 175px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: 1px solid black;
+
 }

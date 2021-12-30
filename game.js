@@ -2,16 +2,22 @@
 
 const gameBoard = (() => {
 
-    const board = ["", "", "", 
-                   "", "", "",
-                   "", "", ""];
+    let board = ["", "", "", 
+                 "", "", "",
+                 "", "", ""];
 
     function addMark(playerSymbol, pos) {
         board[pos] = playerSymbol;
     }
 
+    function reset() {
+        for (let i = 0; i < board.length; i++) {
+            board[i] = "";
+        }
+    }
+
     
-    return { board, addMark }; // returns publicly exposed methods, variables
+    return { board, addMark, reset }; // returns publicly exposed methods, variables
 
 })();
 
@@ -29,10 +35,10 @@ const Player = (symbol, name) => {
 // gameplay controller module
 
 const gamePlayController = (() => {
-    let player1;
-    let player2; 
+    let player1 = "";
+    let player2 = ""; 
 
-    let currentPlayer;
+    let currentPlayer = "";
 
     const setPlayers = (name1, name2) => {
         player1 = Player('X', name1);
@@ -86,7 +92,21 @@ const gamePlayController = (() => {
                checkDiagonalWin(board, currentSymbol));
    }
 
-    return { getCurrentPlayerSymbol, switchTurn, checkWin, setPlayers, getCurrentPlayerName };
+   const checkTie = () => {
+       if (!gameBoard.board.includes("")) {
+           return true;
+       }
+
+       return false;
+   }
+
+   const reset = () => {
+       player1 = "";
+       player2 = "";
+       currentPlayer = "";
+   }
+
+    return { getCurrentPlayerSymbol, switchTurn, checkWin, setPlayers, getCurrentPlayerName, reset, checkTie };
 
 })();
 
@@ -98,7 +118,6 @@ const displayController = (() => {
 
     function run() {
         DOMTiles.forEach(tile => tile.addEventListener('click', (e) => {
-            
             let currentSymbol = gamePlayController.getCurrentPlayerSymbol();
             let pos = e.target.id;
     
@@ -108,7 +127,10 @@ const displayController = (() => {
     
                 if (gamePlayController.checkWin(gameBoard.board, currentSymbol)) {
                     displayWinner(gamePlayController.getCurrentPlayerName());
+                } else if (gamePlayController.checkTie()) {
+                    displayTie();
                 }
+
                 
                 gamePlayController.switchTurn();
             }
@@ -117,11 +139,17 @@ const displayController = (() => {
     
 
     function displayWinner(player) {
-        const container = document.createElement('div');
-        container.textContent = `${player} Wins!`;
+        alert(`${player} Wins!`);
 
-        document.body.appendChild(container);
-        
+        gameBoard.reset();
+        displayController.reset();
+    }
+
+    function displayTie() {
+        alert("It's a Draw");
+
+        gameBoard.reset();
+        displayController.reset();
     }
 
     function renderContents(board) {
@@ -130,7 +158,11 @@ const displayController = (() => {
         });
     }
 
-    return { run };
+    const reset = () => {
+        renderContents(gameBoard.board);
+    }
+
+    return { run, reset };
 
 })();
 
@@ -140,7 +172,12 @@ startBtn = document.querySelector('#start');
 player1Input = document.querySelector('#player-1');
 player2Input = document.querySelector('#player-2');
 
-startBtn.addEventListener('click', () => {
+startBtn.addEventListener('click', (e) => {
+    gameBoard.reset();
+    gamePlayController.reset();
+    displayController.reset();
+
+    e.target.textContent = "reset"; // changes button to reset
     gamePlayController.setPlayers(player1Input.value, player2Input.value);
     displayController.run();
 });
