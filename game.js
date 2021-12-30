@@ -17,24 +17,34 @@ const gameBoard = (() => {
 
 // player factory function
 
-const Player = (symbol) => {
+const Player = (symbol, name) => {
     
     const getSymbol = () => symbol;
+    const getName = () => name;
 
-    return { getSymbol };
+    return { getSymbol, getName };
 };
 
 
 // gameplay controller module
 
 const gamePlayController = (() => {
-    const player1 = Player("X");
-    const player2 = Player("O");
+    let player1;
+    let player2; 
 
+    let currentPlayer;
 
-    let currentPlayer = player1;
+    const setPlayers = (name1, name2) => {
+        player1 = Player('X', name1);
+        player2 = Player('O', name2);
+
+        currentPlayer = player1;
+    } 
+
+    
 
     const getCurrentPlayerSymbol = () => currentPlayer.getSymbol();
+    const getCurrentPlayerName = () => currentPlayer.getName();
 
     function switchTurn() {
         currentPlayer == player1 ? currentPlayer = player2 : currentPlayer = player1;
@@ -76,7 +86,7 @@ const gamePlayController = (() => {
                checkDiagonalWin(board, currentSymbol));
    }
 
-    return { getCurrentPlayerSymbol, switchTurn, checkWin };
+    return { getCurrentPlayerSymbol, switchTurn, checkWin, setPlayers, getCurrentPlayerName };
 
 })();
 
@@ -96,16 +106,23 @@ const displayController = (() => {
                 gameBoard.addMark(currentSymbol, pos);
                 renderContents(gameBoard.board);
     
-                console.log(gamePlayController.checkWin(gameBoard.board, currentSymbol))
+                if (gamePlayController.checkWin(gameBoard.board, currentSymbol)) {
+                    displayWinner(gamePlayController.getCurrentPlayerName());
+                }
                 
-    
                 gamePlayController.switchTurn();
             }
-            
-    
         }));
     }
     
+
+    function displayWinner(player) {
+        const container = document.createElement('div');
+        container.textContent = `${player} Wins!`;
+
+        document.body.appendChild(container);
+        
+    }
 
     function renderContents(board) {
         DOMTiles.forEach((tile, index) => {
@@ -119,5 +136,11 @@ const displayController = (() => {
 
 
 
+startBtn = document.querySelector('#start');
+player1Input = document.querySelector('#player-1');
+player2Input = document.querySelector('#player-2');
 
-displayController.run();
+startBtn.addEventListener('click', () => {
+    gamePlayController.setPlayers(player1Input.value, player2Input.value);
+    displayController.run();
+});
